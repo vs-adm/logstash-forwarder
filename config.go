@@ -32,6 +32,7 @@ type NetworkConfig struct {
 	SSLKey         string   `json:"ssl key"`
 	SSLCA          string   `json:"ssl ca"`
 	Timeout        int64    `json:timeout`
+	LocalAddress   string   `json:"local address"`
 	timeout        time.Duration
 }
 
@@ -88,6 +89,14 @@ func MergeConfig(to *Config, from Config) (err error) {
 		}
 		to.Network.SSLCA = from.Network.SSLCA
 	}
+
+	if from.Network.LocalAddress != "" {
+		if to.Network.LocalAddress != "" {
+			return fmt.Errorf("LocalAddress already defined as '%s' in previous config file", to.Network.LocalAddress)
+		}
+		to.Network.LocalAddress = from.Network.LocalAddress
+	}
+
 	if from.Network.Timeout != 0 {
 		if to.Network.Timeout != 0 {
 			return fmt.Errorf("Timeout already defined as '%d' in previous config file", to.Network.Timeout)

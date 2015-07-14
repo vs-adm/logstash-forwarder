@@ -30,6 +30,27 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+// Add support to local address
+func DialTimeoutBindLocal(network, address string, local_address string, timeout time.Duration) (net.Conn, error) {
+	var d net.Dialer
+
+	if local_address != "" {
+    	emit("Bind to local address: %s\n", local_address)
+
+		la, err := net.ResolveTCPAddr("tcp", local_address)
+
+     	if err != nil {
+            return nil, &net.OpError{Op: "dial", Net: network, Addr: nil, Err: err}
+        }
+
+        d = net.Dialer{Timeout: timeout, LocalAddr: la}
+	} else {
+        d = net.Dialer{Timeout: timeout}
+	}
+
+	return d.Dial(network, address)
+}
+
 func Publishv1(input chan []*FileEvent,
 	registrar chan []*FileEvent,
 	config *NetworkConfig) {
@@ -194,7 +215,7 @@ func connect(config *NetworkConfig) (socket *tls.Conn) {
 
 		emit("Connecting to %s (%s) \n", addressport, host)
 
-		tcpsocket, err := net.DialTimeout("tcp", addressport, config.timeout)
+		tcpsocket, err := DialTimeoutBindLocal("tcp", addressport, config.LocalAddress, config.timeout)
 		if err != nil {
 			emit("Failure connecting to %s: %s\n", address, err)
 			time.Sleep(1 * time.Second)

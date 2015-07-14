@@ -15,6 +15,9 @@
     # to authenticate your downstream server.
     #"ssl ca": "./logstash-forwarder.crt",
 
+    # Local address to bind. Set port to zero.
+    # "local address": "0.0.0.0:0",
+
     # Network timeout in seconds. This is most important for
     # logstash-forwarder determining whether to stop waiting for an
     # acknowledgement from the downstream server. If an timeout is reached,
